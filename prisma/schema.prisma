@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+// generator client {
+//   provider = "prisma-client-js"
+//   output   = "../generated/prisma/client"
+// }
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// npm prisma migrate dev
+
+model User {
+  id       String @id @default(uuid())
+  name     String
+  email    String @unique
+  password String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+  Order      Order[]
+
+  @@map("users")
+}
+
+model Category {
+  id       String    @id @default(uuid())
+  name     String
+  products Product[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  @@map("categories")
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  price       Decimal     @db.Decimal(10, 2)
+  description String
+  banner      String
+  category_id String
+  category    Category    @relation(fields: [category_id], references: [id])
+  orderItems  OrderItem[]
+
+  type        ProductType @default(retirada)
+
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  @@map("products")
+}
+
+model Order {
+  id            String      @id @default(uuid())
+  name          String  
+  userId        String?
+  user          User?        @relation(fields: [userId], references: [id])
+  delivery_type String // 'retirada' ou 'encomenda'
+  delivery_date DateTime? // se for encomenda
+  observation   String?
+  status        OrderStatus @default(pendente)
+  orderItems    OrderItem[] // produtos do pedido
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  productId String
+  amount    Int
+  price     Decimal @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  @@map("items")
+}
+
+enum OrderStatus {
+  pendente
+  confirmado
+  finalizado
+}
+
+enum ProductType {
+  retirada
+  encomenda
+}

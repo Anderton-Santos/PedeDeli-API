@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.publicRoutes = void 0;
+const express_1 = require("express");
+const ListProductPublicController_1 = require("../controllers/product/ListProductPublicController");
+const CreateOrderController_1 = require("../controllers/order/CreateOrderController");
+const ListCategoryPublicController_1 = require("../controllers/category/ListCategoryPublicController");
+const publicRoutes = (0, express_1.Router)();
+exports.publicRoutes = publicRoutes;
+publicRoutes.get('/products/:categoryName', new ListProductPublicController_1.ListProductPublicController().handle);
+publicRoutes.post('/orders', new CreateOrderController_1.CreateOrderController().handle);
+publicRoutes.get('/category', new ListCategoryPublicController_1.ListCategoryPublicController().handle);
